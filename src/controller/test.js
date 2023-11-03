@@ -2,7 +2,7 @@ const testModel = require('../database/models/testModel');
 
 module.exports = async function test(req, res) {
   try {
-    const users = await testModel.find(); // 5sec
+    const users = await testModel.find();
     return res.status(200).json({
       data: users,
     });
