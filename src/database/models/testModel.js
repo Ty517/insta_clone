@@ -29,20 +29,20 @@ const testSchema = new mongoose.Schema(
     },
   },
 );
-const Test = mongoose.model('Test', testSchema);
+const TestUser = mongoose.model('TestUser', testSchema);
 
-const testUser = new Test({
-  name: 'Me',
-  email: 'test@gmail.com',
-  gender: 'Male',
-  password: 'test123',
+// const testUser = new Test({
+//   name: 'Me',
+//   email: 'test@gmail.com',
+//   gender: 'Male',
+//   password: 'test123',
 
-});
-testUser.save().then((doc) => {
-  console.log(doc);
-})
-  .catch((err) => {
-    console.log('Error:', err);
-  });
+// });
+// testUser.save().then((doc) => {
+//   console.log(doc);
+// })
+//   .catch((err) => {
+//     console.log('Error:', err);
+//   });
 
-module.exports = Test;
+module.exports = TestUser;
