@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const testSchema = new mongoose.Schema(
   {
@@ -50,20 +51,18 @@ const testSchema = new mongoose.Schema(
     },
   },
 );
+
+testSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  // Hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // Delete passwordConfirm field
+  this.passwordConfirm = undefined;
+  next();
+});
+
 const TestUser = mongoose.model('TestUser', testSchema);
-
-// const testUser = new Test({
-//   name: 'Me',
-//   email: 'test@gmail.com',
-//   gender: 'Male',
-//   password: 'test123',
-
-// });
-// testUser.save().then((doc) => {
-//   console.log(doc);
-// })
-//   .catch((err) => {
-//     console.log('Error:', err);
-//   });
 
 module.exports = TestUser;
