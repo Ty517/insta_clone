@@ -82,7 +82,7 @@ exports.UpdateUser = async (req, res) => {
 exports.DeleteUser = async (req, res) => {
   try {
     await TestUser.findByIdAndDelete(req.params.id);
-    return res.status(200).json({
+    return res.status(204).json({
       message: 'SUCCESS:)',
       data: null,
     });
