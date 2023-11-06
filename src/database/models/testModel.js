@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const testSchema = new mongoose.Schema(
   {
@@ -7,13 +8,14 @@ const testSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A user must have a name'],
       trim: true,
-      maxlength: [40, 'A user name must have less or equal then 40 characters'],
     },
     email: {
       type: String,
       required: [true, 'A user must have an email'],
       unique: true,
       trim: true,
+      lowercase: true,
+      validate: [validator.isEmail, 'Please provide a valid Email'],
     },
     gender: {
       type: String,
