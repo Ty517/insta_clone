@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable consistent-return */
 /* eslint-disable no-console */
 const mongoose = require('mongoose');
 const validator = require('validator');
@@ -56,7 +58,7 @@ testSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   // Hash the password with cost of 12
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 10);
 
   // Delete passwordConfirm field
   this.passwordConfirm = undefined;
