@@ -1,19 +1,19 @@
-/* eslint-disable no-console */
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const testSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, 'A user must have a name'],
       trim: true,
-      maxlength: [40, 'A user name must have less or equal then 40 characters'],
     },
     email: {
       type: String,
       required: [true, 'A user must have an email'],
       unique: true,
       trim: true,
+      lowercase: true,
     },
     gender: {
       type: String,
@@ -27,22 +27,25 @@ const testSchema = new mongoose.Schema(
       required: [true, 'A user must have a password'],
       trim: true,
     },
+    confirmationToken: String,
+    confirmed: {
+      type: Boolean,
+      default: false,
+    },
   },
+  { timestamps: true },
 );
-const Test = mongoose.model('Test', testSchema);
 
-const testUser = new Test({
-  name: 'Me',
-  email: 'test@gmail.com',
-  gender: 'Male',
-  password: 'test123',
+// Hash the password before saving
+userSchema.pre('save', async function pass(next) {
+  if (!this.isModified('password')) return next;
 
+  // Hash the password with cost of 10
+  this.password = await bcrypt.hash(this.password, 10);
+
+  return next();
 });
-testUser.save().then((doc) => {
-  console.log(doc);
-})
-  .catch((err) => {
-    console.log('Error:', err);
-  });
 
-module.exports = Test;
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;

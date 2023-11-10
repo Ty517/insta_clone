@@ -1,8 +1,9 @@
 const express = require('express');
-const controller = require('../controller');
-const testController = require('../controller/test');
+const authController = require('../controller/authController');
+const validateSignup = require('../middleware/validateSignup');
 
 const route = express.Router();
-route.get('/', controller);
-route.get('/users', testController);
+route.post('/signup', validateSignup, authController.signup);
+route.get('/confirm/:token', authController.confirmEmail);
+
 module.exports = route;
