@@ -13,7 +13,7 @@ exports.signup = (async (req, res) => {
     password: req.body.password,
     confirmationToken: authToken(req.body.email),
   });
-  const emailTemplatePath = path.join(__dirname, '..', 'views', 'email.html');
+  const emailTemplatePath = path.join(__dirname, '..', 'views', 'emails', 'email.html');
   const emailTemplate = await fs.readFile(emailTemplatePath, 'utf-8');
   const userData = {
     name: newUser.name,
@@ -59,7 +59,7 @@ exports.confirmEmail = async (req, res) => {
     user.confirmed = true;
 
     await user.save();
-    const emailTemplatePath = path.join(__dirname, '..', 'views', 'confirmed.html');
+    const emailTemplatePath = path.join(__dirname, '..', 'views', 'emails', 'confirmed.html');
     const emailTemplate = await fs.readFile(emailTemplatePath, 'utf-8');
 
     await sendEmail({
@@ -97,6 +97,36 @@ exports.login = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: 'something went wrong',
+      message: error,
+    });
+  }
+};
+exports.forgotpass = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || user.confirmed === false) {
+      return res.status(401).json({
+        status: 'No Registered User Found',
+      });
+    }
+
+    const emailTemplatePath = path.join(__dirname, '..', 'views', 'emails', 'forgot.html');
+    const emailTemplate = await fs.readFile(emailTemplatePath, 'utf-8');
+
+    await sendEmail({
+      email: user.email,
+      sub: 'Forgotten Password',
+      body: emailTemplate.replace('{{confirmation_link}}', `${process.env.CLIENT_URL}/login`),
+    });
+
+    return res.status(200).json({
+      message: 'Email with reset link was Sent!',
+    });
+  } catch (error) {
+    return res.status(401).json({
+      status: 'An error occurred trying to reset your password',
       message: error,
     });
   }
