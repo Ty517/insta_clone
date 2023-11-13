@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const User = require('../database/models/userModel');
 const sendEmail = require('../utils/email');
+const authToken = require('../utils/token');
 
 exports.signup = (async (req, res) => {
   const newUser = await User.create({
@@ -10,9 +11,7 @@ exports.signup = (async (req, res) => {
     email: req.body.email,
     gender: req.body.gender,
     password: req.body.password,
-    confirmationToken: jwt.sign({ email: req.body.email }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    }),
+    confirmationToken: authToken(req.body.email),
   });
   const emailTemplatePath = path.join(__dirname, '..', 'views', 'email.html');
   const emailTemplate = await fs.readFile(emailTemplatePath, 'utf-8');
@@ -74,6 +73,30 @@ exports.confirmEmail = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: 'An error occurred during email confirmation',
+      message: error,
+    });
+  }
+};
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user
+      || !(await user.correctPassword(password, user.password)) || user.confirmed === false) {
+      return res.status(401).json({
+        status: 'Incorrect email or password',
+      });
+    }
+    // If everything ok, send token to client
+    const token = authToken(user.email);
+    return res.status(200).json({
+      message: 'Successful login!',
+      token,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 'something went wrong',
       message: error,
     });
   }
