@@ -60,6 +60,14 @@ exports.confirmEmail = async (req, res) => {
     user.confirmed = true;
 
     await user.save();
+    const emailTemplatePath = path.join(__dirname, '..', 'views', 'confirmed.html');
+    const emailTemplate = await fs.readFile(emailTemplatePath, 'utf-8');
+
+    await sendEmail({
+      email: user.email,
+      sub: 'Email was Confirmed!',
+      body: emailTemplate,
+    });
     return res.status(200).json({
       message: 'Email has been confirmed',
     });
