@@ -173,3 +173,26 @@ exports.resetpass = async (req, res) => {
     });
   }
 };
+
+exports.changepass = async (req, res) => {
+  const { email } = req.user;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !(await user.correctPassword(req.body.password, user.password))) {
+      return res.status(401).json({
+        status: 'Incorrect password',
+      });
+    }
+    user.password = req.body.newpass;
+    await user.save();
+    return res.status(200).json({
+      message: 'Password changed successfuly!',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 'something went wrong',
+      message: error,
+    });
+  }
+};
