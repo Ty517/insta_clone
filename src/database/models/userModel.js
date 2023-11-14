@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
       required: [true, 'A user must have a password'],
       trim: true,
     },
-    confirmationToken: String,
+    token: String,
     confirmed: {
       type: Boolean,
       default: false,
