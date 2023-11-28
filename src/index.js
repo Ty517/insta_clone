@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const routes = require('./routes');
+const postRoutes = require('./routes/postRoutes');
 require('./database');
 
 const app = express();
@@ -13,9 +14,9 @@ const app = express();
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
 app.use(express.json());
 app.use('/', routes);
+app.use('/posts', postRoutes);
 
 const port = 3000;
 app.listen(port, () => {
