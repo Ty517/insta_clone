@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const Post = require('../database/models/postModel');
+const Like = require('../database/models/likeModel');
 const uploads = require('../utils/uploadHandler');
 
 exports.createPost = async (req, res) => {
@@ -23,11 +24,26 @@ exports.createPost = async (req, res) => {
 
 exports.getallPosts = async (req, res) => {
   try {
-    const userPosts = await Post.find({ userId: req.user.id });
+    const userPosts = await Post.find().lean();
+    if (!userPosts) {
+      return res.status(404).json({
+        message: 'Posts not found',
+      });
+    }
+    const posts = userPosts.map(async (post) => {
+      const { _id: postId } = post;
+      const countLikes = await Like.countDocuments({ post: postId });
+      return {
+        ...post,
+        likes: countLikes,
+      };
+    });
+
+    const postsWithLikes = await Promise.all(posts);
 
     return res.status(200).json({
       message: 'SUCCESS',
-      data: userPosts,
+      data: postsWithLikes,
     });
   } catch (error) {
     return res.status(500).json({
@@ -39,17 +55,20 @@ exports.getallPosts = async (req, res) => {
 exports.getPost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const onePost = await Post.findOne({ _id: postId, userId: req.user.id });
+    const onePost = await Post.findOne({ _id: postId }).lean();
 
     if (!onePost) {
       return res.status(404).json({
         message: 'Post not found',
       });
     }
-
+    const countlikes = await Like.countDocuments({ post: postId });
     return res.status(200).json({
       message: 'SUCCESS',
-      data: onePost,
+      data: {
+        ...onePost,
+        likes: countlikes,
+      },
     });
   } catch (error) {
     return res.status(500).json({
