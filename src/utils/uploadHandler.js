@@ -17,6 +17,13 @@ const multerFilter = (req, file, cb) => {
     cb(new Error('Not an image or video! Please upload only images or videos.'), false);
   }
 };
+const multerFilterProfile = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Not an image! Please upload only images.'), false);
+  }
+};
 
 // Create Cloudinary storage engine using multer storage and filter
 const storage = new CloudinaryStorage({
@@ -30,6 +37,17 @@ const storage = new CloudinaryStorage({
     };
   },
 });
+const profile = new CloudinaryStorage({
+  cloudinary,
+  params: (req, file) => {
+    const parsedPath = path.parse(file.originalname);
+    return {
+      folder: 'igprofiles',
+      public_id: `${Date.now()}-profile-${parsedPath.name || 'unknown'}`,
+      resource_type: 'auto',
+    };
+  },
+});
 const deleteinCloudinary = async (paths) => {
   await Promise.all(paths.map(async (cloudinaryPath) => {
     const filename = cloudinaryPath.split('/').pop().split('.')[0];
@@ -38,5 +56,14 @@ const deleteinCloudinary = async (paths) => {
   }));
 };
 
+const deleteprofile = async (paths) => {
+  const filename = paths.split('/').pop().split('.')[0];
+  const publicId = `igprofiles/${filename}`;
+  await cloudinary.uploader.destroy(publicId);
+};
+
+const uploadprofile = multer({ storage: profile, fileFilter: multerFilterProfile });
 const upload = multer({ storage, fileFilter: multerFilter });
-module.exports = { upload, deleteinCloudinary };
+module.exports = {
+  upload, uploadprofile, deleteinCloudinary, deleteprofile,
+};
