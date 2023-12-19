@@ -4,7 +4,7 @@ const uploads = require('../utils/uploadHandler');
 exports.validateProfile = async (req, res, next) => {
   try {
     const schema = Joi.object({
-      name: Joi.string().required(),
+      name: Joi.string().optional(),
       bio: Joi.string().optional(),
       profilepic: Joi.string().optional(),
     });
@@ -12,11 +12,13 @@ exports.validateProfile = async (req, res, next) => {
     const validationData = {
       name: req.body.name,
       bio: req.body.bio,
-      profilepic: req.file ? req.file.path : null,
+      profilepic: req.file ? req.file.path : undefined,
     };
     const { error } = schema.validate(validationData);
     if (error) {
-      await uploads.deleteprofile(validationData.profilepic);
+      if (validationData.profilepic) {
+        await uploads.deleteprofile(validationData.profilepic);
+      }
       return res.status(400).json({
         message: 'Validation error',
         errors: error.details,
