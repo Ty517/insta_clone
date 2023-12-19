@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.validateSignup = async (req, res, next) => {
   const schema = Joi.object({
@@ -13,8 +14,8 @@ exports.validateSignup = async (req, res, next) => {
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }
@@ -29,8 +30,8 @@ exports.validatelogin = async (req, res, next) => {
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }
@@ -45,8 +46,8 @@ exports.forgot = async (req, res, next) => {
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }
@@ -63,8 +64,8 @@ exports.reset = async (req, res, next) => {
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }
@@ -83,8 +84,8 @@ exports.change = async (req, res, next) => {
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }

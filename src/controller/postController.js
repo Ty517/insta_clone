@@ -2,6 +2,7 @@ const _ = require('lodash');
 const Post = require('../database/models/postModel');
 const Like = require('../database/models/likeModel');
 const uploads = require('../utils/uploadHandler');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.createPost = async (req, res) => {
   try {
@@ -10,13 +11,13 @@ exports.createPost = async (req, res) => {
       userId: req.user.id,
     });
 
-    return res.status(201).json({
-      message: 'Post created successfully',
+    return res.status(StatusCodes.CREATED).json({
+      message: ResponseMessages.SUCCESS,
       post: newPost,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not Create Post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error: error.message,
     });
   }
@@ -26,8 +27,8 @@ exports.getallPosts = async (req, res) => {
   try {
     const userPosts = await Post.find().lean();
     if (!userPosts) {
-      return res.status(404).json({
-        message: 'Posts not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
     const posts = userPosts.map(async (post) => {
@@ -41,13 +42,13 @@ exports.getallPosts = async (req, res) => {
 
     const postsWithLikes = await Promise.all(posts);
 
-    return res.status(200).json({
-      message: 'SUCCESS',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: postsWithLikes,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not find Posts',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 };
@@ -58,21 +59,21 @@ exports.getPost = async (req, res) => {
     const onePost = await Post.findOne({ _id: postId }).lean();
 
     if (!onePost) {
-      return res.status(404).json({
-        message: 'Post not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
     const countlikes = await Like.countDocuments({ post: postId });
-    return res.status(200).json({
-      message: 'SUCCESS',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: {
         ...onePost,
         likes: countlikes,
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not find Post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 };
@@ -83,8 +84,8 @@ exports.changePost = async (req, res) => {
     const onePost = await Post.findOne({ _id: postId, userId: req.user.id });
 
     if (!onePost) {
-      return res.status(404).json({
-        message: 'Post not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
     if (req.files.length > 0) {
@@ -95,13 +96,13 @@ exports.changePost = async (req, res) => {
     // Update the post
     await onePost.update(updatedFields, { runValidators: true });
     const updatedPost = await Post.findOne({ _id: postId, userId: req.user.id });
-    return res.status(200).json({
-      message: 'Post changed successfully!',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: updatedPost,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not update post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 };
@@ -111,18 +112,18 @@ exports.removePost = async (req, res) => {
     const postId = req.params.id;
     const onePost = await Post.findOneAndRemove({ _id: postId, userId: req.user.id });
     if (!onePost) {
-      return res.status(404).json({
-        message: 'Post not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
     await uploads.deleteinCloudinary(onePost.instapost);
-    return res.status(200).json({
-      message: 'Post Removed',
-      data: null,
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
+      data: onePost,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not remove post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 };

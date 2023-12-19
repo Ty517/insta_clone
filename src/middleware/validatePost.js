@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const uploads = require('../utils/uploadHandler');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.validatePost = async (req, res, next) => {
   try {
@@ -18,16 +19,16 @@ exports.validatePost = async (req, res, next) => {
 
     if (error) {
       await uploads.deleteinCloudinary(postsval);
-      return res.status(400).json({
-        message: 'Validation error',
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: ResponseMessages.VALIDATION,
         errors: error.details,
       });
     }
     req.body = validationData;
     return next();
   } catch (error) {
-    return res.status(500).json({
-      message: 'something went wrong',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 };
@@ -49,16 +50,16 @@ exports.validateUpdatePost = async (req, res, next) => {
     const { error } = schema.validate(validationData);
     if (error) {
       await uploads.deleteinCloudinary(validationData.media);
-      return res.status(400).json({
-        message: 'Validation error',
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: ResponseMessages.VALIDATION,
         errors: error.details,
       });
     }
     req.body = validationData;
     return next();
   } catch (error) {
-    return res.status(500).json({
-      message: 'Something went wrong',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       errors: error.details,
     });
   }

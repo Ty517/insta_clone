@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.validateComment = async (req, res, next) => {
   const schema = Joi.object({
@@ -6,8 +7,8 @@ exports.validateComment = async (req, res, next) => {
   });
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({
-      message: 'Validation error',
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: ResponseMessages.VALIDATION,
       errors: error.details,
     });
   }

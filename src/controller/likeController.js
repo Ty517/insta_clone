@@ -1,32 +1,33 @@
 const Like = require('../database/models/likeModel');
 const Post = require('../database/models/postModel');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.like = async (req, res) => {
   try {
     const postliked = await Like.findOne({ user: req.user.id, post: req.params.id });
     if (postliked) {
-      return res.status(409).json({
-        message: 'Post already liked!',
+      return res.status(StatusCodes.CONFLICT).json({
+        message: ResponseMessages.ALREADY_LIKE,
+      });
+    }
+    const post = await Post.findById({ _id: req.params.id });
+    if (!post) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
     const likedpost = await Like.create({
       post: req.params.id,
       user: req.user.id,
     });
-    const post = await Post.findById({ _id: req.params.id });
-    if (!post) {
-      return res.status(404).json({
-        message: 'No Post Found',
-      });
-    }
 
-    return res.status(201).json({
-      message: 'Successfully Liked Post',
+    return res.status(StatusCodes.CREATED).json({
+      message: ResponseMessages.SUCCESS,
       post: likedpost,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not like post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
@@ -35,19 +36,25 @@ exports.like = async (req, res) => {
 exports.unlike = async (req, res) => {
   try {
     const LikeId = req.params.id;
-    const likedpost = await Like.findOneAndRemove({ _id: LikeId, user: req.user.id });
-    if (!likedpost) {
-      return res.status(404).json({
-        message: 'No Such Post Found with Your Like',
+    const post = await Post.findById({ _id: LikeId });
+    if (!post) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
-    return res.status(200).json({
-      message: 'Successfully unliked the post',
+    const likedpost = await Like.findOneAndRemove({ _id: LikeId, user: req.user.id });
+    if (!likedpost) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.DOESNT_LIKE,
+      });
+    }
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       post: likedpost,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not unlike post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
