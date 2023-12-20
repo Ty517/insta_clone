@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../database/models/userModel');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.protect = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ exports.protect = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({ message: 'You are not logged in' });
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: ResponseMessages.NOT_LOGGED });
     }
     // 2) Verification token
     const decoded = jwt.verify(token, process.env.JWT_LOG_SECRET);
@@ -18,15 +19,15 @@ exports.protect = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({
-        message: 'User was not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_USER,
       });
     }
     req.user = user;
     return next();
   } catch (err) {
-    return res.status(500).json({
-      message: 'Invalid Token',
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: ResponseMessages.INVALID_TOKEN,
     });
   }
 };

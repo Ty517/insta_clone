@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const uploads = require('../utils/uploadHandler');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.validateProfile = async (req, res, next) => {
   try {
@@ -19,16 +20,16 @@ exports.validateProfile = async (req, res, next) => {
       if (validationData.profilepic) {
         await uploads.deleteprofile(validationData.profilepic);
       }
-      return res.status(400).json({
-        message: 'Validation error',
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: ResponseMessages.VALIDATION,
         errors: error.details,
       });
     }
     req.body = validationData;
     return next();
   } catch (error) {
-    return res.status(500).json({
-      message: 'Something went wrong',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       errors: error.details,
     });
   }

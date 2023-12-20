@@ -2,6 +2,7 @@ const _ = require('lodash');
 const User = require('../database/models/userModel');
 const uploads = require('../utils/uploadHandler');
 const Follow = require('../database/models/followModel');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.allProfiles = (async (req, res) => {
   try {
@@ -19,13 +20,13 @@ exports.allProfiles = (async (req, res) => {
 
     const profilewithfollowcount = await Promise.all(profiles);
 
-    return res.status(200).json({
-      message: 'Profile retrieved successfully',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: profilewithfollowcount,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not get Profiles',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 });
@@ -34,14 +35,14 @@ exports.oneProfile = (async (req, res) => {
   try {
     const profile = await User.findById({ _id: req.params.id }).select('-password').lean();
     if (!profile) {
-      return res.status(404).json({
-        message: 'Profile not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_USER,
       });
     }
     const countfollowers = await Follow.countDocuments({ following: req.params.id });
     const countfollowing = await Follow.countDocuments({ user: req.params.id });
-    return res.status(200).json({
-      message: 'Profile retrieved successfully',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: {
         ...profile,
         followers: countfollowers,
@@ -49,8 +50,8 @@ exports.oneProfile = (async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not get Profiles',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 });
@@ -59,8 +60,8 @@ exports.updateProfile = (async (req, res) => {
   try {
     const profile = await User.findById({ _id: req.user.id });
     if (!profile) {
-      return res.status(404).json({
-        message: 'Profile not found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_USER,
       });
     }
     if (req.file && profile.profilepic) {
@@ -72,8 +73,8 @@ exports.updateProfile = (async (req, res) => {
     const updatedProfile = await User.findOne({ _id: req.user.id }).select('-password').lean();
     const countfollowers = await Follow.countDocuments({ following: req.user.id });
     const countfollowing = await Follow.countDocuments({ user: req.user.id });
-    return res.status(200).json({
-      message: 'Profile changed successfully',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: {
         ...updatedProfile,
         followers: countfollowers,
@@ -81,8 +82,8 @@ exports.updateProfile = (async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not update Profile',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
     });
   }
 });

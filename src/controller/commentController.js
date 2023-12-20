@@ -1,5 +1,6 @@
 const Comment = require('../database/models/commentModel');
 const Post = require('../database/models/postModel');
+const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstants');
 
 exports.createComment = async (req, res) => {
   try {
@@ -10,17 +11,17 @@ exports.createComment = async (req, res) => {
     });
     const post = await Post.findById({ _id: req.params.id });
     if (!post) {
-      return res.status(404).json({
-        message: 'No Post Found',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_POST,
       });
     }
-    return res.status(201).json({
-      message: 'Successfully commented on Post',
+    return res.status(StatusCodes.CREATED).json({
+      message: ResponseMessages.SUCCESS,
       comment: newComment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not add comment',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
@@ -38,17 +39,17 @@ exports.viewallComment = async (req, res) => {
 
     const comments = await Comment.paginate({ post: postId }, options);
     if (!comments) {
-      return res.status(404).json({
-        message: 'Could not find comments',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_COMMENT,
       });
     }
-    return res.status(200).json({
-      message: 'Success',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       comment: comments,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not retrieve comment',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
@@ -59,17 +60,17 @@ exports.viewComment = async (req, res) => {
     const commentId = req.params.id;
     const comment = await Comment.findById({ _id: commentId });
     if (!comment) {
-      return res.status(404).json({
-        message: 'Could not find comment',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_COMMENT,
       });
     }
-    return res.status(200).json({
-      message: 'Success',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       data: comment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not retrieve comment',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
@@ -80,20 +81,20 @@ exports.changeComment = async (req, res) => {
     const commentId = req.params.id;
     const oldcomment = await Comment.findOne({ _id: commentId, user: req.user.id });
     if (!oldcomment) {
-      return res.status(404).json({
-        message: 'Could not find comment!',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_COMMENT,
       });
     }
     oldcomment.comment = req.body.comment;
     const newComment = oldcomment;
     await newComment.save();
-    return res.status(200).json({
-      message: 'Successfuly changed comment',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       comment: newComment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'could not update comment',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
@@ -104,17 +105,17 @@ exports.removeComment = async (req, res) => {
     const commentId = req.params.id;
     const oldcomment = await Comment.findOneAndRemove({ _id: commentId, user: req.user.id });
     if (!oldcomment) {
-      return res.status(404).json({
-        message: 'Could not find comment',
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: ResponseMessages.NO_COMMENT,
       });
     }
-    return res.status(200).json({
-      message: 'Successfully removed your comment',
+    return res.status(StatusCodes.OK).json({
+      message: ResponseMessages.SUCCESS,
       comment: oldcomment,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Could not remove post',
+    return res.status(StatusCodes.SERVER_ERROR).json({
+      message: ResponseMessages.FAILURE,
       error,
     });
   }
