@@ -17,7 +17,7 @@ exports.createComment = async (req, res) => {
     }
     return res.status(StatusCodes.CREATED).json({
       message: ResponseMessages.SUCCESS,
-      comment: newComment,
+      data: newComment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -36,16 +36,21 @@ exports.viewallComment = async (req, res) => {
       page: pageNumber,
       limit: pageSize,
     };
-
-    const comments = await Comment.paginate({ post: postId }, options);
-    if (!comments) {
+    const onePost = await Post.findOne({ _id: postId }).lean();
+    if (!onePost) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: ResponseMessages.NO_COMMENT,
+        message: ResponseMessages.NO_POST,
       });
     }
+    const comments = await Comment.paginate({ post: postId }, options);
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: comments,
+      data: {
+        items: comments.docs,
+        totalPages: comments.totalPages,
+        currentPage: comments.page,
+        pageSize: comments.limit,
+      },
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -90,7 +95,7 @@ exports.changeComment = async (req, res) => {
     await newComment.save();
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: newComment,
+      data: newComment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -111,7 +116,7 @@ exports.removeComment = async (req, res) => {
     }
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: oldcomment,
+      data: oldcomment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({

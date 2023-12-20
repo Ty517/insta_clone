@@ -25,26 +25,37 @@ exports.createPost = async (req, res) => {
 
 exports.getallPosts = async (req, res) => {
   try {
-    const userPosts = await Post.find().lean();
-    if (!userPosts) {
+    const pageNumber = req.query.pageNumber || 1;
+    const pageSize = req.query.pageSize || 10;
+    const options = {
+      page: pageNumber,
+      limit: pageSize,
+    };
+    const userPosts = await Post.paginate({}, options);
+
+    if (userPosts.docs.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).json({
         message: ResponseMessages.NO_POST,
       });
     }
-    const posts = userPosts.map(async (post) => {
+
+    const postsWithLikes = await Promise.all(userPosts.docs.map(async (post) => {
       const { _id: postId } = post;
       const countLikes = await Like.countDocuments({ post: postId });
       return {
-        ...post,
+        ...post.toObject(),
         likes: countLikes,
       };
-    });
-
-    const postsWithLikes = await Promise.all(posts);
+    }));
 
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      data: postsWithLikes,
+      data: {
+        items: postsWithLikes,
+        totalPages: userPosts.totalPages,
+        currentPage: userPosts.page,
+        pageSize: userPosts.limit,
+      },
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -116,7 +127,7 @@ exports.removePost = async (req, res) => {
         message: ResponseMessages.NO_POST,
       });
     }
-    await uploads.deleteinCloudinary(onePost.instapost);
+    await uploads.deleteinCloudinary(onePost.media);
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
       data: onePost,
