@@ -17,7 +17,7 @@ exports.createComment = async (req, res) => {
     }
     return res.status(StatusCodes.CREATED).json({
       message: ResponseMessages.SUCCESS,
-      comment: newComment,
+      data: newComment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -45,7 +45,7 @@ exports.viewallComment = async (req, res) => {
     }
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: comments,
+      data: comments,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -90,7 +90,7 @@ exports.changeComment = async (req, res) => {
     await newComment.save();
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: newComment,
+      data: newComment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
@@ -111,7 +111,7 @@ exports.removeComment = async (req, res) => {
     }
     return res.status(StatusCodes.OK).json({
       message: ResponseMessages.SUCCESS,
-      comment: oldcomment,
+      data: oldcomment,
     });
   } catch (error) {
     return res.status(StatusCodes.SERVER_ERROR).json({
