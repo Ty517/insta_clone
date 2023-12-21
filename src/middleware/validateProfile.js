@@ -5,13 +5,17 @@ const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstant
 exports.validateProfile = async (req, res, next) => {
   try {
     const schema = Joi.object({
-      name: Joi.string().optional(),
-      bio: Joi.string().optional(),
-      profilepic: Joi.string().optional(),
+      name: Joi.string(),
+      username: Joi.string(),
+      gender: Joi.string().valid('Male', 'Female'),
+      bio: Joi.string(),
+      profilepic: Joi.string(),
     });
 
     const validationData = {
       name: req.body.name,
+      username: req.body.username,
+      gender: req.body.gender,
       bio: req.body.bio,
       profilepic: req.file ? req.file.path : undefined,
     };
