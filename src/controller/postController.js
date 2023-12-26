@@ -33,12 +33,6 @@ exports.getallPosts = async (req, res) => {
     };
     const userPosts = await Post.paginate({}, options);
 
-    if (userPosts.docs.length === 0) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: ResponseMessages.NO_POST,
-      });
-    }
-
     const postsWithLikes = await Promise.all(userPosts.docs.map(async (post) => {
       const { _id: postId } = post;
       const countLikes = await Like.countDocuments({ post: postId });

@@ -4,6 +4,7 @@ const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstant
 exports.validateSignup = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().required(),
+    username: Joi.string().required(),
     email: Joi.string().email().required(),
     gender: Joi.string().valid('Male', 'Female').required(),
     password: Joi.string()

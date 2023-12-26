@@ -15,6 +15,7 @@ const ResponseMessages = {
   INVALID_TOKEN: 'Invalid Token',
   NOT_LOGGED: 'You Are Not Logged In',
   NO_POST: 'Post Not Found',
+  EXISTING_USER: 'This Username Has Been Taken',
   NO_USER: 'User Not Found',
   NO_COMMENT: 'Comment Not Found',
   SELF_FOLLOW: 'You Can Not Follow Yourself',

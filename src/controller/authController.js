@@ -8,8 +8,15 @@ const { StatusCodes, ResponseMessages } = require('../constants/repsonseConstant
 
 exports.signup = (async (req, res) => {
   try {
+    const user = await User.findOne({ username: req.body.username });
+    if (user) {
+      return res.status(StatusCodes.CONFLICT).json({
+        message: ResponseMessages.EXISTING_USER,
+      });
+    }
     const newUser = await User.create({
       name: req.body.name,
+      username: req.body.username,
       email: req.body.email,
       gender: req.body.gender,
       password: req.body.password,
